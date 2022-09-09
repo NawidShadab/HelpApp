@@ -39,23 +39,28 @@ class User(Base):
     lastName = Column(String, nullable = False)
     email = Column(String, nullable = False, unique = True)
     password = Column(String, nullable = False)
-    #address = Column(Integer, ForeignKey("address.id", ondelete="CASCADE"), nullable = False,)
     image = Column(String, nullable = False)
-    role = Column(String, nullable = False)
+    #role = Column(String, nullable = False)
+
+    role_id = Column(Integer, ForeignKey("roles.id", ondelete="CASCADE") ,nullable = False)
     created_at = Column(TIMESTAMP(timezone=True),
                        nullable = False, server_default=text('now()'))
 
+
+
     address = relationship("Address", back_populates = "owner")
+    role = relationship("Role", back_populates = "owner")
 
 
 # better to send an astring as a vlaue from frontend ("provider" or "reciepant" )
-# class Role(Base):
-#     __tablename__ = 'role'
+class Role(Base):
+    __tablename__ = 'roles'
 
-#     # table columns
-#     id = Column(Integer, primary_key=True, nullable = False) # not null
-#     name = Column(String, nullable = False)
+    # table columns
+    id = Column(Integer, primary_key=True, nullable = False,) # not null
+    name = Column(String, nullable = False)
 
+    owner = relationship("User", back_populates = "role")
 
 
 
@@ -72,6 +77,103 @@ class Address(Base):
 
     owner = relationship("User", back_populates="address")
 
+
+class Article(Base):
+    __tablename__ = 'articles'
+
+    id = Column(Integer, primary_key=True, nullable = False)
+    name = Column(String, nullable = False)
+    age_category_id = Column(Integer, ForeignKey("age_categories.id", ondelete="CASCADE") ,nullable = False)
+    sex = Column(String, nullable = False)
+    size = Column(Integer, ForeignKey("sizes.id", ondelete="CASCADE") ,nullable = False)
+    image = Column(String, nullable = False)
+    barcode = Column(String, nullable = False)
+    details_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE") ,nullable = False)
+
+    created_at = Column(TIMESTAMP(timezone=True),
+                       nullable = False, server_default=text('now()'))
+
+    # category_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE") ,nullable = False)
+    # sub_category_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE") ,nullable = False)
+    # provider_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE") ,nullable = False)
+    # reciepient_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE") ,nullable = False)
+    # status_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE") ,nullable = False)
+
+    age = relationship("AgeCategory", back_populates = "owner")
+    article_size = relationship("Size", back_populates = "owner")
+    # article_cat = relationship("Category", back_populates = "owner")
+    # article_sub_cat = relationship("SubCategory", back_populates = "owner")
+    # article_status = relationship("Status", back_populates = "owner")
+
+
+
+class AgeCategory(Base):
+    __tablename__ = 'age_categories'
+
+    id = Column(Integer, primary_key=True, nullable = False)
+    name = Column(String, nullable = False)
+
+    owner = relationship("Article", back_populates = "age")
+
+
+
+class Size(Base):
+    __tablename__ = 'sizes'
+
+    id = Column(Integer, primary_key=True, nullable = False)
+    name = Column(String, nullable = False)
+
+    owner = relationship("Article", back_populates = "article_size")
+
+
+
+class Detail(Base):
+    __tablename__ = 'Details'
+
+    id = Column(Integer, primary_key=True, nullable = False)
+    name = Column(String, nullable = False)
+
+    category_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE") ,nullable = False)
+    sub_category_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE") ,nullable = False)
+    provider_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE") ,nullable = False)
+    reciepient_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE") ,nullable = False)
+    status_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE") ,nullable = False)
+
+    article_cat = relationship("Category", back_populates = "owner")
+    article_sub_cat = relationship("SubCategory", back_populates = "owner")
+    article_status = relationship("Status", back_populates = "owner")
+
+    owner = relationship("Article", back_populates = "article_size")
+
+
+
+class Category(Base):
+    __tablename__ = 'Categories'
+
+    id = Column(Integer, primary_key=True, nullable = False)
+    name = Column(String, nullable = False)
+
+    owner = relationship("Detail", back_populates = "article_cat")
+
+
+
+class SubCategory(Base):
+    __tablename__ = 'SubCategories'
+
+    id = Column(Integer, primary_key=True, nullable = False)
+    name = Column(String, nullable = False)
+
+    owner = relationship("Detail", back_populates = "article_sub_cat")
+
+
+
+class Status(Base):
+    __tablename__ = 'statuses'
+
+    id = Column(Integer, primary_key=True, nullable = False)
+    name = Column(String, nullable = False)
+
+    owner = relationship("Detail", back_populates = "article_status")
 
 
 

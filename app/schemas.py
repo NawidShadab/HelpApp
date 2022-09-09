@@ -8,19 +8,20 @@ from enum import Enum
 
 
 ############################################################
-# class RoleBase(BaseModel):
-#     name: str
+class RoleBase(BaseModel):
+    name: str
 
 
-# class create_role(RoleBase):
-#     pass
+class create_role(BaseModel):
+    id: int
+    name: str = "provider"
 
 
-# class Role(RoleBase):
-#     id: int
+class Role(RoleBase):
+    id: int
 
-#     class config:
-#         orm_mode = True
+    class config:
+        orm_mode = True
 
 # class Role2(str, Enum):
 #     provider = "provider"
@@ -66,7 +67,7 @@ class UserCreate(UserBase):
     password: str
     address: Address_create
     image: str
-    role: str
+    role_id: str
 
 
 class User(UserBase):
@@ -82,27 +83,17 @@ class User(UserBase):
 class UserOut(UserBase):
     id: int
     created_at: datetime
-
+    role_id: int
     class Config:
         orm_mode = True
 
-class UserResponse(UserBase):
+class UserResponse(BaseModel):
     user: UserOut
     address: AddressResponse
 
     class Config:
         orm_mode = True
 
-class UserResponse2(BaseModel):
-    id: int
-    firstName: str
-    lastName: str
-    email: EmailStr
-    created_at: datetime
-    adresse: list[AddressOut] = []
-
-    class Config:
-        orm_mode = True
 
 ############################################################
 # login Schema

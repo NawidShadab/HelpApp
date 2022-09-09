@@ -21,10 +21,8 @@ router = APIRouter(
 
 # register new user
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model= schemas.UserResponse)
-def create_users(user: schemas.UserCreate, db: Session = Depends(get_db),
+def create_users(user: schemas.UserCreate,  db: Session = Depends(get_db),
                   ):
-
-
     # cheking if the entered email already exists
     user_email = user.email
     user_email_db = db.query(models.User).filter(models.User.email == user_email).first()
@@ -38,10 +36,12 @@ def create_users(user: schemas.UserCreate, db: Session = Depends(get_db),
     # update the user password with overrite it with hashed one
     user.password = hashed_password
 
+    user_role = roleOfUser(user, user.role_id, db)
+    print("-------------------kkk", user.role_id)
     # better to convert the pydantic obj to dic and upack it
     #new_user = models.User(**user.dict())
     new_user = models.User(firstName=user.firstName, lastName=user.lastName, email=user.email,
-                           password=user.password, image=user.image, role=user.role
+                           password=user.password, image=user.image, role_id=user_role
                           )
 
     print(str(new_user.firstName))
@@ -71,13 +71,13 @@ def create_users(user: schemas.UserCreate, db: Session = Depends(get_db),
     creat_at = new_user.created_at
     print("-------------------", type(new_user))
     print("-------------------", type(user_address))
-    user = schemas.UserOut(id=new_user.id, firstName=new_user.firstName, lastName=new_user.lastName, email=new_user.email, created_at=new_user.created_at)
+    user = schemas.UserOut(id=new_user.id, firstName=new_user.firstName, lastName=new_user.lastName, email=new_user.email, created_at=new_user.created_at, role_id=new_user.role_id)
     address = schemas.AddressResponse(id=user_address.id, owner_id=user_address.owner_id, street=user_address.street, city=user_address.city, houseNumber=user_address.houseNumber, zip=user_address.zip)
     return schemas.UserResponse(user=user, address=address)
     #return new_user
 
 
-
+#cheking the address of user to save in address table
 def create_address(user: schemas.UserCreate, user_id: int, db: Session = Depends(get_db)):
     user_address = models.Address(street=user.address.street, houseNumber=user.address.houseNumber,
                                    zip=user.address.zip, city=user.address.city, owner_id=user_id )
@@ -90,9 +90,16 @@ def create_address(user: schemas.UserCreate, user_id: int, db: Session = Depends
     return user_address
 
 
+# checking the role of user to add the role_user
+def roleOfUser(user: schemas.UserCreate, user_role_name: str, db: Session = Depends(get_db)):
+
+    user_role = db.query(models.Role).filter(models.Role.name == user_role_name).first()
+
+    print('##############', user_role.id)
+    return user_role.id
 
 
-
+############################################ GET USER #####################################
 
 
 # get the registered user by id
